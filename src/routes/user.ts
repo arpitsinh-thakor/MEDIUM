@@ -21,6 +21,7 @@ userRouter.post('/signup', async (c) => {
 			data: {
 				email: body.email,
 				password: body.password,
+				name: body.name
 			}
 		})
 
@@ -31,10 +32,6 @@ userRouter.post('/signup', async (c) => {
 	catch(e){
 		return c.json({e})
 	}
-	finally{
-		await prisma.$disconnect()
-	}
-	
 })
 
 userRouter.post('/signin',async (c) => {
@@ -65,8 +62,5 @@ userRouter.post('/signin',async (c) => {
 	}
 	catch(e){
 		return c.json({e})
-	}
-	finally{
-		await prisma.$disconnect()
 	}
 })

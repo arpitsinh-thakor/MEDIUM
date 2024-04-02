@@ -15,15 +15,20 @@ export const postRouter = new Hono<{
 }>();
 
 postRouter.use("/*", async (c, next) => {
-    const authHeader = c.req.header('Authorization') || "";
-    const user = await verify(authHeader, c.env.JWT_SECRET);
+    try{
+        const authHeader = c.req.header('Authorization') || "";
+        const user = await verify(authHeader, c.env.JWT_SECRET);
 
-    if(!user){
-        return c.json({error: 'Unauthorized'})
-    }
-    else{
-        c.set('userId', user.id);
-        await next()
+        if(!user){
+            return c.json({error: 'Unauthorized user'})
+        }
+        else{
+            c.set('userId', user.id);
+            await next()
+        }
+        }
+    catch(e){
+        return c.json({error: 'Unauthorized catch'})
     }
 })
 
@@ -45,9 +50,6 @@ postRouter.get('/get/:id',async (c) => {
     }
     catch(e){
         return c.json({e})
-    }
-    finally{
-        await prisma.$disconnect()
     }
 })
 
@@ -71,9 +73,6 @@ postRouter.post('/', async (c) => {
     }
     catch(e){
         return c.json({e})
-    }
-    finally{
-        await prisma.$disconnect()
     }
 })
 
@@ -99,9 +98,6 @@ postRouter.put('/',async (c) => {
     catch(e){
         return c.json({e})
     }
-    finally{
-        await prisma.$disconnect()
-    }
 })
 
 postRouter.get('/bulk', async (c) => {
@@ -109,7 +105,12 @@ postRouter.get('/bulk', async (c) => {
         datasourceUrl:c.env.DATABASE_URL,
     }).$extends(withAccelerate())
 
-    const posts = await prisma.post.findMany();
+    try{
+        const posts = await prisma.post.findMany();
 
-    return c.json({posts})
+        return c.json({posts})
+    }
+    catch(e){
+        return c.json({e, msg: 'Error fetching posts'})
+    }
 })
